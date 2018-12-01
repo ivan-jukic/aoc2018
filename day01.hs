@@ -1,7 +1,5 @@
 module Day01 (main) where
 
-import Data.Maybe
-
 
 main :: IO ()
 main = do

@@ -51,7 +51,7 @@ compareIDs _ []          = Nothing
 compareIDs needle (s:xs) = if difference needle s == 1 then Just (needle, s) else compareIDs needle xs
 
 
--- Find out how many different letters are there at same positions in two strings
+-- Find out how many different letters there are at same positions in two strings
 difference :: String -> String -> Int
 difference a b = sum $ zipWith (\ca cb -> if ca == cb then 0 else 1) a b
 
@@ -61,7 +61,7 @@ processResult Nothing       = "n/a"
 processResult (Just (a, b)) = expelIntruder a b ""
 
 
--- only keep the same letters in strings at same places
+-- only keep the same letters at same places in the strings
 expelIntruder :: String -> String -> String -> String
 expelIntruder [] _ res = res
 expelIntruder _ [] res = res

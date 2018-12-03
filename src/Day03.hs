@@ -16,25 +16,40 @@ data Rect = Rect { id' :: Int
 
 main :: IO ()
 main = do
-    contents <- readFile $ "inputs/_test_"
+    contents <- readFile $ "inputs/day03"
     let rects = mapMaybe id . map mapToRect . lines $ contents
-    --putStrLn . ("Overlapping points: " ++) . show . Map.size . calculatePartOne $ rects
-    putStrLn . ("Non overlapping rect: " ++) .show . calculatePartTwo $ rects
+    putStrLn . ("Number of overlapping points: " ++) . show . Map.size . calculatePartOne $ rects
+    putStrLn . ("Non-overlapping rect ids: " ++) . show . calculatePartTwo $ rects
+
 
 -- Part 2
 
-calculatePartTwo :: [Rect] -> Map.Map String [Int]
-calculatePartTwo rect =
-    let idMap = getIdMap Map.empty rect
-        overlappingIds = foldl (\ids ov -> if length ov > 1 then ids ++ ov else ov) [] & Map.elems
+-- Get ids of all rects that overlapp, compare with list of all rects
+calculatePartTwo :: [Rect] -> [Int]
+calculatePartTwo rects =
+    let idMap = getIdMap Map.empty rects
+        overlappingIds = foldl appendUnique [] $ Map.elems idMap
+        rectIds = foldl (\rids r -> rids ++ [id' r]) [] $ rects
+    in foldl (\res rid -> if notElem rid overlappingIds then res ++ [rid] else res) [] rectIds
 
 
+-- Get map with points as keys, and list of all rects that occupy specific points
 getIdMap :: Map.Map String [Int] -> [Rect] -> Map.Map String [Int]
 getIdMap res []        = res
 getIdMap res (rect:xr) =
     let points = getRectPoints rect
         updatedRes = foldl (\d k -> Map.insertWith (++) k [id' rect] d) res $ points
     in getIdMap updatedRes xr
+
+
+-- add to a from b if length of b > 1, only elements not already in a
+appendUnique :: [Int] -> [Int] -> [Int]
+appendUnique a b =
+    if length b > 1 then 
+        foldl (\unq id -> if notElem id unq then unq ++ [id] else unq) a b
+    else
+        a
+
 
 
 -- Part 1
@@ -52,7 +67,7 @@ getPointMap res (rect:xr) =
     in getPointMap updatedRes xr
 
 
--- I can reuse these !!
+-- I can reuse these hooray !!
 
 
 -- Parse input into a type

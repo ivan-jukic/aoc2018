@@ -16,14 +16,43 @@ data Rect = Rect { id' :: Int
 
 main :: IO ()
 main = do
-    contents <- readFile $ "inputs/day03"
-    putStrLn . ("Overlapping points: " ++) . show . Map.size . parseInput $ contents
+    contents <- readFile $ "inputs/_test_"
+    let rects = mapMaybe id . map mapToRect . lines $ contents
+    --putStrLn . ("Overlapping points: " ++) . show . Map.size . calculatePartOne $ rects
+    putStrLn . ("Non overlapping rect: " ++) .show . calculatePartTwo $ rects
+
+-- Part 2
+
+calculatePartTwo :: [Rect] -> Map.Map String [Int]
+calculatePartTwo rect =
+    let idMap = getIdMap Map.empty rect
+        overlappingIds = foldl (\ids ov -> if length ov > 1 then ids ++ ov else ov) [] & Map.elems
 
 
-parseInput :: String -> Map.Map String Int
-parseInput entries = 
-    let rects = mapMaybe id . map mapToRect . lines $ entries
-    in Map.filter (> 1) . getPointMap Map.empty $ rects
+getIdMap :: Map.Map String [Int] -> [Rect] -> Map.Map String [Int]
+getIdMap res []        = res
+getIdMap res (rect:xr) =
+    let points = getRectPoints rect
+        updatedRes = foldl (\d k -> Map.insertWith (++) k [id' rect] d) res $ points
+    in getIdMap updatedRes xr
+
+
+-- Part 1
+
+calculatePartOne :: [Rect] -> Map.Map String Int
+calculatePartOne rects = 
+    Map.filter (> 1) . getPointMap Map.empty $ rects
+
+
+getPointMap :: Map.Map String Int -> [Rect] -> Map.Map String Int
+getPointMap res []        = res
+getPointMap res (rect:xr) =
+    let points = getRectPoints rect
+        updatedRes = foldl (\d k -> Map.insertWith (+) k 1 d) res $ points
+    in getPointMap updatedRes xr
+
+
+-- I can reuse these !!
 
 
 -- Parse input into a type
@@ -37,14 +66,6 @@ mapToRect s =
 
             _ ->
                 Nothing
-
-
-getPointMap :: Map.Map String Int -> [Rect] -> Map.Map String Int
-getPointMap res []        = res
-getPointMap res (rect:xr) =
-    let points = getRectPoints rect
-        updatedRes = foldl (\d k -> Map.insertWith (+) k 1 d) res $ points
-    in getPointMap updatedRes xr
 
 
 getRectPoints :: Rect -> [String]

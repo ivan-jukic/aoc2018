@@ -2,6 +2,8 @@ module Day04 (main) where
 
 import qualified Data.Map.Strict as Map
 import qualified Data.Text       as T
+import           Data.Foldable
+import           Data.Ord
 import           Debug.Trace     (traceShowId)
 import           Text.Regex
 
@@ -14,9 +16,7 @@ data GuardAction
         deriving (Eq, Show)
 
 
-data Guard = Guard { id'   :: Int
-                   , sleep :: [Int]
-                   } deriving (Show)
+-- not really a fan of the solution's code, think it can be better
 
 
 main :: IO ()
@@ -24,12 +24,51 @@ main = do
     contents <- readFile "inputs/day04"
     let sorted = Map.toList $ sortedInput contents
         actionsOnly = map snd sorted
-        sleeping = sleepyGuards actionsOnly (-1) (-1) Map.empty
+        sleeping = Map.toList $ sleepyGuards actionsOnly (-1) (-1) Map.empty
         (gid, min) = sleepiestGuard sleeping
-    putStrLn ("Sleepiest guard " ++ (show gid) ++ ", and min " ++ (show min) ++ ", with total " ++ (show $ gid * min))
+        (gid', min', cnt') = mostSameMinsSlept sleeping
+    putStrLn ("Sleepiest guard " ++ (show gid) ++ ", and min " ++ (show min) ++ ", with product " ++ (show $ gid * min))
+    putStrLn ("Most same minute slept guard " ++ (show gid') ++ ", and min " ++ (show min') ++ ", with product " ++ (show $ gid' * min'))
+
+-- Part 2
+
+mostSameMinsSlept :: [(Int, [Int])] -> (Int, Int, Int)
+mostSameMinsSlept sleepList =
+    foldl findMostSleptMin (-1, -1, -1) sleepList
+
+
+findMostSleptMin :: (Int, Int, Int) -> (Int, [Int]) -> (Int, Int, Int)
+findMostSleptMin current@(gid, mins, cnt) (gid', minsSlept) =
+        let minsCount = countSleepMins minsSlept
+            (mins', cnt') = maximumBy compareSnd minsCount
+        in if cnt' > cnt then (gid', mins', cnt') else current
 
 
 -- Part 1
+
+
+sleepiestGuard :: [(Int, [Int])] -> (Int, Int)
+sleepiestGuard sleepList =
+    let (gid, mins) = maximumBy compareSndList sleepList
+        sleepyMins = countSleepMins mins
+        (sleepiestMin, _) = maximumBy compareSnd sleepyMins
+    in (gid, sleepiestMin)
+
+
+countSleepMins :: [Int] -> [(Int, Int)]
+countSleepMins mins = Map.toList . foldl (\res m -> Map.insertWith (+) m 1 res) Map.empty $ mins
+
+
+compareSndList :: (Int, [Int]) -> (Int, [Int]) -> Ordering
+compareSndList (g, m) (g', m') = compare (length m) (length m')
+
+
+compareSnd :: Ord a => (t, a) -> (t, a) -> Ordering
+compareSnd (m, c) (m', c') = compare c c'
+
+
+-- Sort guards by sleeping minutes
+
 
 sleepyGuards :: [GuardAction] -> Int -> Int -> Map.Map Int [Int] -> Map.Map Int [Int]
 sleepyGuards [] _ _ res            = res
@@ -49,15 +88,8 @@ sleepyGuards (act:xa) gid smin res =
             Map.empty -- error
 
 
-sleepiestGuard :: Map.Map Int [Int] -> (Int, Int)
-sleepiestGuard sleepMap =
-    let (gid, mins) = foldl (\(g, m) (g', m') -> if length m' > length m then (g', m') else (g, m)) (-1, []) $ Map.toList sleepMap
-        sleepyMins = Map.toList . foldl (\res m -> Map.insertWith (+) m 1 res) Map.empty $ mins
-        (sleepiesMin, _) = foldl (\(m, c) (m', c') -> if c' > c then (m', c') else (m, c)) (-1, -1) sleepyMins
-    in (gid, sleepiesMin)
-
-
 -- Sort input
+
 
 sortedInput :: String -> Map.Map String GuardAction
 sortedInput contents = foldl (\m (k, a) -> Map.insert k a m) Map.empty . map parseString . inputLines $ contents

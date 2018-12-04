@@ -1,9 +1,9 @@
 module Day03 (main) where
 
-import           Text.Regex
+import qualified Data.Map.Strict as Map
 import           Data.Maybe
-import qualified Data.Map.Strict    as Map
-import           Debug.Trace        (traceShowId)
+import           Debug.Trace     (traceShowId)
+import           Text.Regex
 
 
 data Rect = Rect { id' :: Int
@@ -45,7 +45,7 @@ getIdMap res (rect:xr) =
 -- add to a from b if length of b > 1, only elements not already in a
 appendUnique :: [Int] -> [Int] -> [Int]
 appendUnique a b =
-    if length b > 1 then 
+    if length b > 1 then
         foldl (\unq id -> if notElem id unq then unq ++ [id] else unq) a b
     else
         a
@@ -55,7 +55,7 @@ appendUnique a b =
 -- Part 1
 
 calculatePartOne :: [Rect] -> Map.Map String Int
-calculatePartOne rects = 
+calculatePartOne rects =
     Map.filter (> 1) . getPointMap Map.empty $ rects
 
 

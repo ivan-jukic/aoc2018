@@ -37,8 +37,8 @@ reducePolymer polymer = reduce' [] polymer
     where reduce' res []  = res
           reduce' res [p] = res ++ [p] -- when reduced to the last element
           reduce' res (a:b:xp)
-            | shouldCollaps a b =
-                if shouldCollapsWithPrev res xp then
+            | shouldCollapse a b =
+                if shouldCollapseWithPrev res xp then
                     let prev = last res
                     in reduce' (init res) ([prev] ++ xp)
                 else
@@ -46,16 +46,16 @@ reducePolymer polymer = reduce' [] polymer
             | otherwise         = reduce' (res ++ [a]) ([b] ++ xp)
 
 
-shouldCollapsWithPrev :: String -> String -> Bool
-shouldCollapsWithPrev [] _       = False
-shouldCollapsWithPrev _ []       = False
-shouldCollapsWithPrev prev (p:_) =
+shouldCollapseWithPrev :: String -> String -> Bool
+shouldCollapseWithPrev [] _       = False
+shouldCollapseWithPrev _ []       = False
+shouldCollapseWithPrev prev (p:_) =
     let p' = last prev
-    in shouldCollaps p p'
+    in shouldCollapse p p'
 
 
-shouldCollaps :: Char -> Char -> Bool
-shouldCollaps a b = ((toUpper a) == b || a == (toUpper b)) && a /= b
+shouldCollapse :: Char -> Char -> Bool
+shouldCollapse a b = ((toUpper a) == b || a == (toUpper b)) && a /= b
 
 
 --

@@ -19,10 +19,28 @@ main = do
         coords = getBoundingCoords points
         distances = mapDistances coords points
         infinitePoints = infiniteAreaPoints coords distances
-    putStrLn . ("Max bounded area is: " ++ ) . show . calcMaxArea coords infinitePoints $ distances
+    putStrLn . ("Max bounded area is: " ++ ) . show . calcMaxArea coords infinitePoints $ distances -- ~ 20-22 sec
+    putStrLn . ("Region size: " ++) . show . length $ calcRegions coords points -- ~ 5-6 sec
 
 
--- Part 1 - probably not the nicest solution... ~ 20 sec
+-- Part 2
+
+
+distLimit :: Int
+distLimit = 10000
+
+
+calcRegions :: (Point, Point) -> [Point] -> [Int]
+calcRegions (pmin, pmax) points =
+    let coords = [ Point x y | x <- [x pmin .. x pmax], y <- [y pmin .. y pmax]]
+    in filter (\v -> v < distLimit) . map (calcAllDist points) $ coords
+
+
+calcAllDist :: [Point] -> Point -> Int
+calcAllDist points pt = foldl' (\total pt' -> total + (manhattanDist pt pt')) 0 points
+
+
+-- Part 1 - probably not the nicest solution... 
 
 
 calcMaxArea :: (Point, Point) -> [Point] -> Map.Map Point ([Point], Int) -> Int

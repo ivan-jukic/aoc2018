@@ -22,10 +22,10 @@ main = do
     putStrLn . ("Max bounded area is: " ++ ) . show . calcMaxArea coords infinitePoints $ distances
 
 
--- Part 1 - probably not the nicest solution...
+-- Part 1 - probably not the nicest solution... ~ 20 sec
 
 
-calcMaxArea :: (Point, Point) -> [Point] -> Map.Map String ([Point], Int) -> Int
+calcMaxArea :: (Point, Point) -> [Point] -> Map.Map Point ([Point], Int) -> Int
 calcMaxArea (pmin, pmax) infinitePoints distances =
     let areas = Map.toList . foldl' countCoords Map.empty $ Map.elems distances
         notInfinitePoint = \(p, _) -> p `notElem` infinitePoints
@@ -40,12 +40,12 @@ countCoords res _        = res
 -- get rid of all the points that touch the edge of the bounding box
 
 
-infiniteAreaPoints :: (Point, Point) -> Map.Map String ([Point], Int) -> [Point]
+infiniteAreaPoints :: (Point, Point) -> Map.Map Point ([Point], Int) -> [Point]
 infiniteAreaPoints (pmin, pmax) distances =
     let xrng   = [x pmin..x pmax]
         yrng   = [y pmin..y pmax]
         boundingPoints =
-            map (\(x', y') -> show x' ++ ":" ++ show y') $
+            map (\(x', y') -> Point x' y') $
                 [ (x, y pmin) | x <- xrng ] ++
                 [ (x, y pmax) | x <- xrng ] ++
                 [ (x pmin, y) | y <- yrng ] ++
@@ -70,7 +70,7 @@ unique = foldl (\unq val -> if val `elem` unq then unq else (unq ++ [val])) []
 -- Create distances map
 
 
-mapDistances :: (Point, Point) -> [Point] -> Map.Map String ([Point], Int)
+mapDistances :: (Point, Point) -> [Point] -> Map.Map Point ([Point], Int)
 mapDistances _ []                = error "no points"
 mapDistances (pmin, pmax) points =
     let xcoords = [ x pmin .. x pmax ]
@@ -79,7 +79,7 @@ mapDistances (pmin, pmax) points =
     in createDistMap points coords
 
 
-createDistMap :: [Point] -> [(Int, Int)] -> Map.Map String ([Point], Int)
+createDistMap :: [Point] -> [(Int, Int)] -> Map.Map Point ([Point], Int)
 createDistMap [] _          = error "no points for map"
 createDistMap _ []          = error "no coords"
 createDistMap points coords = create' points Map.empty
@@ -89,11 +89,10 @@ createDistMap points coords = create' points Map.empty
             in create' xp newRes
 
 
-checkCoordDistance :: Point -> Map.Map String ([Point], Int) -> (Int, Int) -> Map.Map String ([Point], Int)
+checkCoordDistance :: Point -> Map.Map Point ([Point], Int) -> (Int, Int) -> Map.Map Point ([Point], Int)
 checkCoordDistance p res (cx, cy) =
-    let key = show cx ++ ":" ++ show cy
-        cp = Point cx cy
-        d = manhattanDist p cp
+    let key = Point cx cy
+        d = manhattanDist p key
     in case Map.lookup key res of
         Just (pts, d') ->
             if d < d' then

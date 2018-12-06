@@ -1,9 +1,9 @@
 module Day04 (main) where
 
-import qualified Data.Map.Strict as Map
-import qualified Data.Text       as T
 import           Data.Foldable
+import qualified Data.Map.Strict as Map
 import           Data.Ord
+import qualified Data.Text       as T
 import           Debug.Trace     (traceShowId)
 import           Text.Regex
 
@@ -76,7 +76,7 @@ sleepyGuards (act:xa) gid smin res =
     case act of
         StartedShift newGid ->
             sleepyGuards xa newGid smin res
-        
+
         FellAsleep newSmin->
             sleepyGuards xa gid newSmin res
 

@@ -1,7 +1,7 @@
 module Day05 (main) where
 
 import           Data.Char
-import           Debug.Trace     (traceShowId)
+import           Debug.Trace (traceShowId)
 
 
 -- I feel a bit better about this code

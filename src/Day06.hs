@@ -3,8 +3,8 @@ module Day06 (main) where
 import           Data.Foldable   (foldl')
 import qualified Data.Map.Strict as Map
 import qualified Data.Text       as T
-import           Text.Regex
 import           Debug.Trace     (traceShowId)
+import           Text.Regex
 
 
 data Point = Point { x :: Int
@@ -16,24 +16,32 @@ main :: IO ()
 main = do
     contents <- readFile "inputs/day06"
     let points = parseInput contents
-        bounding = getBoundingCoords points
-        distances = mapDistances bounding points        
-    putStrLn . ("Max bounded area is: " ++ ) . show $ calcMaxArea bounding distances
+        coords = getBoundingCoords points
+        distances = mapDistances coords points
+        infinitePoints = infiniteAreaPoints coords distances
+    putStrLn . ("Max bounded area is: " ++ ) . show . calcMaxArea coords infinitePoints $ distances
 
 
 -- Part 1 - probably not the nicest solution...
 
 
-calcMaxArea :: (Point, Point) -> Map.Map String ([Point], Int) -> Int
-calcMaxArea (pmin, pmax) distances =
+calcMaxArea :: (Point, Point) -> [Point] -> Map.Map String ([Point], Int) -> Int
+calcMaxArea (pmin, pmax) infinitePoints distances =
     let areas = Map.toList . foldl' countCoords Map.empty $ Map.elems distances
-        bounding = unique $ boundingPoints pmin pmax distances
-    in maximum . map snd . filter (\(p, _) -> p `notElem` bounding) $ areas
+        notInfinitePoint = \(p, _) -> p `notElem` infinitePoints
+    in maximum . map snd . filter notInfinitePoint $ areas
+
+
+countCoords :: Map.Map Point Int -> ([Point], Int) -> Map.Map Point Int
+countCoords res ([p], _) = Map.insertWith (+) p 1 res
+countCoords res _        = res
 
 
 -- get rid of all the points that touch the edge of the bounding box
-boundingPoints :: Point -> Point -> Map.Map String ([Point], Int) -> [Point]
-boundingPoints pmin pmax distances =
+
+
+infiniteAreaPoints :: (Point, Point) -> Map.Map String ([Point], Int) -> [Point]
+infiniteAreaPoints (pmin, pmax) distances =
     let xrng   = [x pmin..x pmax]
         yrng   = [y pmin..y pmax]
         boundingPoints =
@@ -42,7 +50,7 @@ boundingPoints pmin pmax distances =
                 [ (x, y pmax) | x <- xrng ] ++
                 [ (x pmin, y) | y <- yrng ] ++
                 [ (x pmax, y) | y <- yrng ]
-    in foldl'
+    in unique . foldl'
         (\res key ->
             case Map.lookup key distances of
                 Just ([pt], _) ->
@@ -55,9 +63,8 @@ boundingPoints pmin pmax distances =
         $ boundingPoints
 
 
-countCoords :: Map.Map Point Int -> ([Point], Int) -> Map.Map Point Int
-countCoords res ([p], _) = Map.insertWith (+) p 1 res
-countCoords res _        = res
+unique :: [Point] -> [Point]
+unique = foldl (\unq val -> if val `elem` unq then unq else (unq ++ [val])) []
 
 
 -- Create distances map
@@ -106,7 +113,7 @@ getBoundingCoords :: [Point] -> (Point, Point)
 getBoundingCoords []     = error "no points"
 getBoundingCoords [pt]   = error "only one point"
 getBoundingCoords (p1:p2:points) = coords' (p1, p2) points
-    where coords' (pmin, pmax) [] = (pmin, pmax)
+    where coords' (pmin, pmax) []     = (pmin, pmax)
           coords' (pmin, pmax) (p:xp) = coords' (compareCoords pmin pmax p) xp
 
 
@@ -127,14 +134,8 @@ manhattanDist pt1 pt2 =
     abs(x pt1 - x pt2) + abs(y pt1 - y pt2)
 
 
--- Just some helper fn
-    
-
-unique :: [Point] -> [Point]
-unique = foldl (\unq val -> if val `elem` unq then unq else (unq ++ [val])) []
-
-
 -- Parse points
+
 
 parseInput :: String -> [Point]
 parseInput inpt = map getPoint . inputLines $ inpt

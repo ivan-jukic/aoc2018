@@ -2,14 +2,14 @@
 
 module Day07 (main) where
 
-import           Data.Foldable        (foldl')
 import           Data.Attoparsec.Text (Parser)
 import qualified Data.Attoparsec.Text as Atto
+import qualified Data.Char            as C
+import           Data.Foldable        (foldl')
+import qualified Data.List            as L
 import qualified Data.Map.Strict      as Map
 import qualified Data.Text            as T
 import           Debug.Trace          (traceShowId)
-import qualified Data.List            as L
-import qualified Data.Char            as C
 
 
 main :: IO ()

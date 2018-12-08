@@ -1,6 +1,6 @@
 module Day08 (main) where
 
-import      Data.Foldable (foldl')
+import           Data.Foldable (foldl')
 
 data Tree = Empty | Leaf [Int] | Node [Int] [Tree] deriving (Show)
 
@@ -47,7 +47,7 @@ getAt idx vals = getAt' vals 0
 
 sumMeta :: Tree -> Int
 sumMeta Empty = 0
-sumMeta tree  = sumMeta' tree 0 
+sumMeta tree  = sumMeta' tree 0
     where sumMeta' (Node meta children) total = total + (foldl' (\t c -> sumMeta' c t ) (sum meta) children)
           sumMeta' (Leaf meta) total          = total + (sum meta)
 
@@ -78,7 +78,7 @@ getChildNodes numChild treeData =
 nodeAddChildren :: [Tree] -> Tree -> Tree
 nodeAddChildren children Empty                 = Node [0] children
 nodeAddChildren _ (Leaf m)                     = Leaf m
-nodeAddChildren children' (Node meta children) = Node meta (children ++ children') 
+nodeAddChildren children' (Node meta children) = Node meta (children ++ children')
 
 
 nodeAddMeta :: [Int] -> Tree -> Tree

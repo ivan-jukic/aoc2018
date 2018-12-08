@@ -40,7 +40,7 @@ calcAllDist :: [Point] -> Point -> Int
 calcAllDist points pt = foldl' (\total pt' -> total + (manhattanDist pt pt')) 0 points
 
 
--- Part 1 - probably not the nicest solution... 
+-- Part 1 - probably not the nicest solution...
 
 
 calcMaxArea :: (Point, Point) -> [Point] -> Map.Map Point ([Point], Int) -> Int

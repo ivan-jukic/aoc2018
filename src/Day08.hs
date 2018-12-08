@@ -10,15 +10,44 @@ main = do
     content <- parseInput <$> readFile "inputs/day08"
     let (tree, _) = buildTree content
     putStrLn . ("Metadata entries sum: " ++) . show . sumMeta $ tree
+    putStrLn . ("Metadata entries sum 2: " ++) . show . sumMeta2 $ tree
+
+
+-- Part 2
+
+
+sumMeta2 :: Tree -> Int
+sumMeta2 Empty = 0
+sumMeta2 tree  = sumMeta' tree 0
+    where sumMeta' (Node meta children) total = foldl' (\t idx -> t + (sumForChild idx children)) 0 meta
+          sumMeta' (Leaf meta) total          = total + (sum meta)
+
+
+sumForChild :: Int -> [Tree] -> Int
+sumForChild idx children =
+    case getAt (idx - 1) children of
+        Just child ->
+            sumMeta2 child
+
+        Nothing ->
+            0
+
+
+-- Hoogle only showed (!!) operator, which sucks!
+
+getAt :: Int -> [a] -> Maybe a
+getAt _ []     = Nothing
+getAt idx vals = getAt' vals 0
+    where getAt' [] _     = Nothing
+          getAt' (v:xv) i = if i == idx then Just v else getAt' xv (i+1)
 
 
 -- Part 1
 
 
 sumMeta :: Tree -> Int
-sumMeta Empty       = 0
-sumMeta (Leaf meta) = sum meta
-sumMeta tree        = sumMeta' tree 0 
+sumMeta Empty = 0
+sumMeta tree  = sumMeta' tree 0 
     where sumMeta' (Node meta children) total = total + (foldl' (\t c -> sumMeta' c t ) (sum meta) children)
           sumMeta' (Leaf meta) total          = total + (sum meta)
 

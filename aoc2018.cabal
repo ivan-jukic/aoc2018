@@ -36,3 +36,12 @@ library
     , regex-compat
     , attoparsec
   default-language: Haskell2010
+
+Executable day09
+    Main-is:
+        Day09.hs
+    hs-source-dirs:
+        ./src
+  build-depends:
+      base >=4.7 && <5
+    , containers

@@ -1,4 +1,4 @@
-module Day09 (main) where
+module Main (main) where
 
 import           Data.Foldable (foldl', toList)
 import qualified Data.Sequence as Seq
@@ -18,8 +18,8 @@ data State = State { marbles :: Seq Int
 
 main :: IO ()
 main = do
-    putStrLn . ("Part 1: " ++) . show $ playMarbles 458 72019 -- ~ 2sec with Sequences vs 1m 40s with Lists
-    putStrLn . ("Part 2: " ++) . show $ playMarbles 458 7201900 -- ? stack overflow ? :(
+    putStrLn . ("Part 1: " ++) . show $ playMarbles 458 72019 -- ~ < 1 sec compiled, 2sec ghci with Sequences vs 1m 40s with Lists ghci
+    putStrLn . ("Part 2: " ++) . show $ playMarbles 458 7201900 --  ~ 10 sec compiled, stack overflow ghci
 
 
 initState :: Int -> State
